@@ -1,0 +1,258 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+// so we have users whether client or dev . we also have offers and gigs . we have proposals for offers/gigs . we have chatroom.
+
+enum EmploymentType{
+  FULLTIME
+  PARTTIME
+}
+
+enum PricingType {
+  HOURLY
+  FIXED
+
+}
+enum UserRole {
+  CLIENT
+  FREELANCER
+}
+enum CategoryType{
+  WEB_DEVELOPMENT
+  MOBILE_DEVELOPMENT
+  UI_UX_DESIGN
+  PROJECT_MANAGEMENT
+  VIDEO_EDITING
+  ML_MODEL
+  MARKETING
+  
+}
+
+
+type TechnicalSkills{
+  category CategoryType
+  stack String[]
+}
+
+type AssessmentType  {
+  communication Int
+  leadership Int
+  adaptability Int
+  teamwork Int
+  timeManagement Int
+}
+
+enum ContractType {
+  GIG
+  JOB
+}
+
+model User {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  firstName String
+  lastName String
+  email String @unique
+  hashedPassword String
+  image String?
+  profileImage String?
+
+  role UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  generalRating Float @default(0)
+  // profile Profile?
+  hasNotification Boolean @default(false)
+  notifications Notification[]
+  skills TechnicalSkills[]
+  assessment AssessmentType?
+  
+  createdJobs Job[] @relation("Client")
+  proposals Proposal[]
+  proposalContractClient ProposalContract[] @relation("ContractClient")
+  proposalContractFreelancer ProposalContract[] @relation("ContractFreelancer")
+
+  
+  
+  createdGigs Gig[] 
+  offers Offer[]
+  gigContractClient GigContract[] @relation("ContractClient")
+  gigContractFreelancer GigContract[] @relation("ContractFreelancer")
+
+  reviews Review[]
+  messages Message[]
+  clientChatrooms Chatroom[] @relation("Client")
+  freelancerChatrooms Chatroom[] @relation("Freelancer")
+
+
+
+
+}
+
+model ProposalContract {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  pricing PricingType
+  price Float
+  fulfilled Boolean
+
+
+
+  clientId String @db.ObjectId
+  freelancerId String @db.ObjectId
+  jobId String @db.ObjectId @unique
+
+
+  client User @relation("ContractClient",fields: [clientId],references: [id])
+  freelancer User @relation("ContractFreelancer",fields: [freelancerId],references: [id])
+  job Job @relation(fields: [jobId],references: [id])
+
+
+}
+
+model GigContract {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  pricing PricingType
+  price Float
+  fulfilled Boolean
+
+
+  clientId String @db.ObjectId
+  freelancerId String @db.ObjectId
+  gigId String @db.ObjectId @unique
+
+
+  client User @relation("ContractClient",fields: [clientId],references: [id])
+  freelancer User @relation("ContractFreelancer",fields: [freelancerId],references: [id])
+  gig Gig @relation(fields: [gigId],references: [id])
+
+
+}
+
+model Job {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  description String
+  tags String[]
+  employment EmploymentType
+  pricing PricingType
+  price Float?
+  duration Int //weeks
+
+  clientId String @db.ObjectId
+  client User @relation("Client",fields:[clientId],references: [id])
+
+  skills TechnicalSkills[]
+  proposals Proposal[]
+  locked Boolean
+  contract ProposalContract?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  review Review?
+
+
+}
+
+model Gig{
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  description String
+  tags String[]
+  //tech skills
+  pricing PricingType
+  price Float
+  image String?
+  freelancerId String @db.ObjectId
+  freelancer User @relation(fields: [freelancerId],references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  offer Offer[]
+  contract GigContract[]
+  // proposals Proposal[]
+
+}
+
+model Offer {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  description String
+  // pricing + price
+  gigId String @db.ObjectId 
+  gig Gig @relation(fields: [gigId],references: [id])
+  clientId String @db.ObjectId
+  client User @relation(fields: [clientId],references: [id])
+  @@unique([gigId,clientId])
+
+}
+
+model Proposal{
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  content String
+  price Float
+  userId String @db.ObjectId
+  jobId String @db.ObjectId
+  // gigId String @db.ObjectId
+
+  user User @relation(fields: [userId],references: [id])
+  job Job @relation(fields: [jobId],references: [id])
+  // gig Gig @relation(fields: [gigId],references: [id])
+  createdAt DateTime @default(now())
+
+
+  @@unique([userId,jobId])
+
+}
+
+model Review{
+
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  content String
+  rating Int
+  
+  freelancerId String @db.ObjectId
+  jobId String @unique @db.ObjectId
+  
+  freelancer User @relation(fields: [freelancerId],references: [id])
+  job Job @relation(fields: [jobId],references: [id])
+
+}
+
+
+model Notification {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  content String
+  userId String @db.ObjectId
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId],references: [id])
+}
+
+model Chatroom {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  messages Message[]
+  clientId String @db.ObjectId
+  client User @relation("Client",fields: [clientId],references: [id])
+  freelancerId String @db.ObjectId
+  freelancer User @relation("Freelancer",fields: [freelancerId],references: [id])
+
+}
+
+model Message {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  content String
+  userId String @db.ObjectId
+  chatroomId String @db.ObjectId
+  user User @relation(fields: [userId],references: [id])
+  chatroom Chatroom @relation(fields: [chatroomId],references: [id],onDelete:Cascade)
+}
