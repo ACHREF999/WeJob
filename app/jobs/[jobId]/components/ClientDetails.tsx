@@ -55,7 +55,7 @@ export default function ClientDetails({jobId,session}: {jobId:string,session:any
             </button>
             </>):proposal?.data[0]?.id?
             (<>
-                <Link href="" className="text-xl font-semibold w-full rounded-full bg-[#740B99] text-white py-2" onClick={handleClick}>
+                <Link href={""} className="text-xl font-semibold w-full rounded-full bg-[#740B99] text-white py-2" onClick={handleClick}>
                 Go To Discussion
             </Link>
             </>):null}
@@ -87,7 +87,8 @@ export default function ClientDetails({jobId,session}: {jobId:string,session:any
                 </span>{' '}
                 Jobs Posted
             </p>
-                {(client.id==session?.user?.userId) ?(<button className="border-none text-center bg-[#740B99] text-white font-semibold text-lg py-2 px-4 rounded-xl ">
+                {(client.id==session?.user?.userId) ?(
+                <button className="border-none text-center bg-[#740B99] text-white font-semibold text-lg py-2 px-4 rounded-xl ">
                 Edit Job
             </button>):null}
         </div>

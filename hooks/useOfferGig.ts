@@ -1,10 +1,9 @@
-'use client'
 import useSWR from 'swr'
 import fetcher from '@/libs/fetcher'
 
-export default function useGig(gigId: string) {
+const useOfferGig = (gigId: string) => {
     const { data, error, isLoading, mutate } = useSWR(
-        gigId ? `/api/gigs/${gigId}` : null,
+        gigId ? `/api/offers/gig/${gigId}` : null,
         fetcher
     )
     return {
@@ -14,3 +13,5 @@ export default function useGig(gigId: string) {
         mutate,
     }
 }
+
+export default useOfferGig

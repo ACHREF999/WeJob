@@ -52,6 +52,7 @@ export const authOptions: AuthOptions = {
           token.role = user.role;
           token.name = `${user.firstName} ${user.lastName}`
           token.userId = user.id;
+          token.image = user.image;
           
         }
         return token;
@@ -63,6 +64,7 @@ export const authOptions: AuthOptions = {
         //   session.user.subscribed = token.subscribed;
             session.user.name=token.name
             session.user.userId = token.userId
+            session.user.image = token.image
         }
         return session;
       },

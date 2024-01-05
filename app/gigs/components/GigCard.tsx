@@ -17,7 +17,7 @@ type Props = {
     }
 }
 
-const GigCard = ({id,title,pricing,image,price,freelancer}: Props) => {
+const GigCard = ({id,title,pricing,image,price,freelancer}: any) => {
 
   return (
     <Link className="w-72 h-[21rem] border-[1px] rounded-xl flex flex-col" href={`/gigs/${id}`}>
@@ -39,7 +39,7 @@ const GigCard = ({id,title,pricing,image,price,freelancer}: Props) => {
             />
             <div className='flex flex-col items-start pl-4'>
             <h2 className="text-lg font-medium ">{freelancer?.firstName} {freelancer?.lastName}</h2>
-            <p>{freelancer?.rating}/5</p>
+            <p>{freelancer?.generalRating}/5</p>
             </div>
 
 

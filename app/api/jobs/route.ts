@@ -71,6 +71,15 @@ export async function GET(req:NextRequest){
                 ]
         }
     }
+
+    let userQuery = {
+
+    }
+    if(session?.user?.userId){
+        userQuery = {
+                        clientId:session?.user?.userId 
+                    }
+    }
     // let fixedQuery = {}
     // if (!Number.isNaN(fixedMinPrice)) {
     //     fixedQuery.price = {...fixedQuery.price, gt: fixedMinPrice }
@@ -116,9 +125,7 @@ export async function GET(req:NextRequest){
                     OR: [hourlyQuery, fixedQuery],
                 },
                 {
-                    NOT:{
-                        clientId:session?.user?.userId || "asddsa"
-                    }
+                    NOT:userQuery
                 },
             ],
         },

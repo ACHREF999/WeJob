@@ -1,81 +1,198 @@
 'use client'
-import useLoginModal from '@/hooks/useLoginModal'
-import useRegisterModal from '@/hooks/useRegisterModal'
+// import useRegisterModal from '@/hooks/useRegisterModal'
+
 import Modal from './Modal'
-import { useCallback, useState } from 'react'
+import { useCallback, useState,useEffect } from 'react'
 import Input from '@/components/Input'
-import {signIn} from 'next-auth/react'
+// import {signIn} from 'next-auth/react'
+import  useEditModal  from '@/hooks/useEditModal';
+import useUser from '@/hooks/useUser';
+import Image from 'next/image'
+import { UploadDropzone } from '@/libs/uploadthing';
+import toast from 'react-hot-toast'
+import axios from 'axios'
+import { useRouter } from 'next/navigation';
 
-
-function LoginModal() {
-    const loginModal = useLoginModal()
-    const registerModal = useRegisterModal()
-    const [data, setData] = useState({
-        email: '',
-        password: '',
-
-    })
+function EditModal() {
+    const router = useRouter()
+    const editModal = useEditModal()
+    // const registerModal = useRegisterModal()
+    const {data:user,isLoading:userIsLoading,error} = useUser(editModal.userId)
+    const [firstName,setFirstName] = useState(user?.data.firstName||'')
+    const [lastName,setLastName] = useState(user?.data.lastName||'')
+    const [githubLink,setGithubLink] = useState(user?.data.githubLink||null)
+    const [linkedinLink,setLinkedinLink] = useState(user?.data.linkedinLink||null)
+    const [description,setDescription] = useState(user?.data.description||null)
+    const [image,setImage] = useState(user?.data.image||null)
+    
     const [isLoading, setIsLoading] = useState(false)
+    useEffect(()=>{
+        setFirstName(user?.data.firstName||'')
+        setLastName(user?.data.lastName||'')
+    },[user])
+    // const onToggle = useCallback(() => {
+    //     if (isLoading) return
+    //     registerModal.onOpen()
+    //     return
+    // }, [])
+    const DiscardImage = async (e:any) => {
+    console.log('delete files')
+    let value = image
+    setImage('')
+    try{
 
-    const onToggle = useCallback(() => {
-        if (isLoading) return
-        loginModal.onClose()
-        registerModal.onOpen()
-        return
-    }, [])
+        const res = await axios.delete('/api/uploadthing',{
+        data:{
+            url:value
+        }
+    })
+    console.log(res)
+
+    toast.success('Deleted Image Successfully')    
+}
+    catch{
+        toast.error('Failed To delete the image')
+        
+    }
+    }
+
+    const validateInput = ()=>{
+        if(firstName.length<3 || lastName.length<3 ){
+            return false
+        }
+        return true   
+    }
+    
 
 
     const bodyContent = (
-        <div className="flex flex-col gap-10 mt-10">
+        <div className="flex flex-col gap-4 mt-10">
+            
             <h1 className="pl-2 text-gray-400 font-medium">
-                Welcome Back to WeeJob
+                Customize your profile
             </h1>
-            <Input
-                type="email"
-                disabled={isLoading}
-                placeholder="Email"
-                value={data.email}
-                onChange={(e) => setData({ ...data, email: e.target.value })}
+
+            <div className="flex flex-row gap-8">
+                <Input
+                    type="text"
+                    disabled={isLoading}
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) =>
+                        setFirstName(e.target.value)
+                    }
+                />
+                <Input
+                    type="text"
+                    disabled={isLoading}
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) =>
+                        setLastName(e.target.value)
+                    }
+                />
+            </div>
+            <textarea
+                rows={4}
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="outline-none bg-gray-50/20 border-gray-300 border-[1px]  w-full p-2 rounded-lg resize-none"
+                placeholder="Enter Description ..."
             />
+            <div className="flex flex-row gap-8">
+
             <Input
-                type="password"
+                type="text"
                 disabled={isLoading}
-                placeholder="Password"
-                value={data.password}
-                onChange={(e) => setData({ ...data, password: e.target.value })}
+                placeholder="Github Link"
+                value={githubLink}
+                onChange={(e) => setGithubLink(e.target.value)}
             />
-        </div>
+
+
+            <Input
+                type="text"
+                disabled={isLoading}
+                placeholder="Linkedin Link"
+                value={linkedinLink}
+                onChange={(e) => setLinkedinLink(e.target.value)}
+            />
+            </div>
+            {(image) && (<button
+                        onClick={DiscardImage}
+                        className="text-lg font-medium flex flex-row gap-4 items-center justify-center w-[25%] border-[1px] border-[#740B99] text-[#740B99] rounded-full py-2"
+                    >discard Image </button>)}
+                {image ? (
+                    <div className="w-full relative h-[45vh] mb-[7rem]">
+                        <Image
+                            src={image}
+                            alt="uploaded image"
+                            fill
+                            objectFit="contain"
+                        />
+                    </div>
+                ) : (
+                    <UploadDropzone
+                        className="w-full mb-[7rem]"
+                        endpoint="imageUploader"
+                        onClientUploadComplete={(res) => {
+                            // Do something with the response
+
+                            console.log('Files: ', res)
+                            setImage(res?.[0].url)
+                            toast.success('Image Uploaded!')
+                        }}
+                        onUploadError={(error: Error) => {
+                            // Do something with the error.
+                            toast.error(`ERROR uploading image! ${error.message}`)
+                        }}
+                    />
+                )}
+            </div>
+
     )
     const footerContent = (
         <div>
-            Dont Have an account ?{' '}
-            <span
-                className="text-sky-500 cursor-pointer self-center"
-                onClick={onToggle}
-            >
-                Sign Up
-            </span>
+            
         </div>
     )
     const handleSubmit = async () => {
         setIsLoading(true)
-        await signIn('credentials',{
+        if(!validateInput()){
+            toast.error('Please Fill Fields Correctly')
+            toast.error('First and Last Name are required fields')
             
-            email:data.email,
-            password:data.password
-        })
-        // console.log(loginModal)
-        setIsLoading(false)
-        loginModal.onClose()
+        }
+        else{
+            const {data:newUser} = await axios.put(`/api/users/${editModal.userId}`, {
+                firstName,
+                lastName,
+                image,
+                description,
+                githubLink,
+                linkedinLink,
+            })
+            console.log('Updated User : ',newUser)
+            if(newUser ){
+                toast.success('UpdatedSuccessfully')
+                
+                editModal.onClose()
+                router.refresh()
+            }else{
+                toast.error('Failed To Update')
+            }
+            setIsLoading(false)
+        }
       }
 
     return (
         <Modal
-            isOpen={loginModal.isOpen}
-            onClose={loginModal.onClose}
+            isOpen={editModal.isOpen}
+            onClose={editModal.onClose}
             onSubmit={handleSubmit}
-            actionLabel="Login"
-            title="Login"
+            actionLabel="Update Profile"
+            title="Update"
             footer={footerContent}
             body={bodyContent}
             disabled={isLoading}
@@ -83,4 +200,4 @@ function LoginModal() {
     )
 }
 
-export default LoginModal
+export default EditModal

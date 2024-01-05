@@ -5,6 +5,12 @@ import {useState} from 'react'
 import Select, { GroupBase, SingleValue, ThemeConfig } from 'react-select'
 import toast from 'react-hot-toast'
 import {useRouter} from 'next/navigation'
+import { UploadButton, UploadDropzone } from '@/libs/uploadthing'
+import Image from 'next/image'
+import { utapi } from '@/libs/utapi'
+
+
+
 
 type Props = {}
 
@@ -18,6 +24,8 @@ const JobForm = (props: Props) => {
     const [price,setPrice] = useState<number|undefined>()
     const [category,setCategory] = useState<string|undefined>()
     const [skills,setSkills] = useState<string[]>([])
+    const [image,setImage] = useState('')
+
     // const [error,setError] = useState(null)
 
     const pricingOptions = [
@@ -95,16 +103,44 @@ const JobForm = (props: Props) => {
             return
         }
         // let employment = duration>=8?'FULLTIME':'PARTTIME'
-        const {data:gig} = await axios.post('/api/gigs',{title,description,duration,pricing,price,category,skills})
-        console.log(gig)
-        if (gig ){
+        const {data:gig} = await axios.post('/api/gigs',{title,description,duration,pricing,price,category,skills,image})
+        console.log(gig.data)
+        if (gig && gig.data && gig.data.id ){
         toast.success('Gig Created Succesfully')
         router.push(`/gigs/${gig.data.id}`)
         }
     }
 
+    const DiscardImage = async (e:any) => {
+        console.log('delete files')
+        let value = image
+        setImage('')
+        try{
+
+            const res = await axios.delete('/api/uploadthing',{
+            data:{
+                url:value
+            }
+        })
+        console.log(res)
+
+        toast.success('Deleted Image Successfully')    
+    }
+        catch{
+            toast.error('Failed To delete the image')
+            
+        }
+    }
+    
+    const canPost = ()=>{
+        return !(!title ||title.length<10|| description.length<100 || !price || !category || skills.length<2 || !image)
+    }
+
     return (
-        <form className="flex flex-col gap-2 py-8 mx-6 border-r-2" onSubmit={handleSubmit}>
+        <form
+            className="flex flex-col gap-2 py-8 mx-6 border-r-2"
+            onSubmit={handleSubmit}
+        >
             {/* Title */}
             <div className="flex flex-col gap-2 px-36  border-b-2 py-6">
                 <label htmlFor="title" className="text-2xl ">
@@ -239,7 +275,11 @@ const JobForm = (props: Props) => {
                         <h3 className="text-md">Skills :</h3>
                         <div className="w-full min-w-full py-1">
                             <Select
-                                placeholder={!category?"Select A category First":"Select skills"}
+                                placeholder={
+                                    !category
+                                        ? 'Select A category First'
+                                        : 'Select skills'
+                                }
                                 onChange={(e) => {
                                     setSkills((prev) =>
                                         e.map((option) => {
@@ -254,22 +294,64 @@ const JobForm = (props: Props) => {
                                 className="w-full hide-scrollbar"
                                 options={skillsOptions}
                                 styles={categoryStyles}
-                                isOptionDisabled={() => (skills.length >= 3 || !category)}
+                                isOptionDisabled={() =>
+                                    skills.length >= 3 || !category
+                                }
 
                                 // defaultValue={'TALENT'}
                             />
                         </div>
                     </div>
                 </div>
+            </div>
 
-                
+            {/* image upload */}
+            <div className="px-36 flex flex-col">
+                <div className="flex flex-row w-[75%] justify-between items-center">
+                    <h3 className="text-md">Cover Image :</h3>
+
+                    {(image) && (<button
+                        onClick={DiscardImage}
+                        className="text-lg font-medium flex flex-row gap-4 items-center justify-center w-[15%] border-[1px] border-[#740B99] text-[#740B99] rounded-full py-2"
+                    >discard Image </button>)}
+                </div>
+                {image ? (
+                    <div className="w-[75%] relative h-[45vh]">
+                        <Image
+                            src={image}
+                            alt="uploaded image"
+                            fill
+                            objectFit="contain"
+                        />
+                    </div>
+                ) : (
+                    <UploadDropzone
+                        className="w-[75%]"
+                        endpoint="imageUploader"
+                        onClientUploadComplete={(res) => {
+                            // Do something with the response
+
+                            console.log('Files: ', res)
+                            setImage(res?.[0].url)
+                            toast.success('Image Uploaded!')
+                        }}
+                        onUploadError={(error: Error) => {
+                            // Do something with the error.
+                            toast.error(`ERROR! ${error.message}`)
+                        }}
+                    />
+                )}
             </div>
 
             <div className="flex flex-col px-36 border-b-2 py-2">
-                <button type="submit" className="border-none text-center bg-[#740B99] text-white font-semibold text-lg py-2 px-4 rounded-xl w-[15%]">
+                <button
+                    type="submit"
+                    className={`border-none text-center bg-[#740B99] text-white font-semibold text-lg py-2 px-4 rounded-xl w-[15%] disabled:cursor-not-allowed disabled:opacity-25`}
+                    disabled={!canPost()}
+                
+                >
                     Post Job
                 </button>
-
             </div>
         </form>
     )

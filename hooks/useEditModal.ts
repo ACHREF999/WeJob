@@ -2,13 +2,15 @@ import {create } from 'zustand'
 
 interface EditStore {
     isOpen : boolean
-    onOpen: ()=>void
+    userId:string
+    onOpen: (userId:string)=>void
     onClose:()=>void
 }
 
 const useEditModal = create<EditStore>((set)=>({
     isOpen:false,
-    onOpen:()=>set({isOpen:true}),
+    userId:'',
+    onOpen:(userId)=>set({isOpen:true,userId:userId}),
     onClose:()=>set({isOpen:false})
 }))
 

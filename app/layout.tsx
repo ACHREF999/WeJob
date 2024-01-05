@@ -6,10 +6,13 @@ import LoginModal from '@/components/modals/LoginModal'
 import RegisterModal from '@/components/modals/RegisterModal'
 import Footer from '@/components/Footer'
 import ProposalModal from '@/components/modals/ProposalModal'
+import OfferModal from '@/components/modals/OfferModal'
 import {Toaster}  from 'react-hot-toast'
 import NextAuthProvider from './components/NextAuthProvider'
 import { getServerSession } from 'next-auth'
 import NextTopLoader from 'nextjs-toploader'
+import EditModal from '@/components/modals/EditModal'
+
 
 export const metadata: Metadata = {
   title: 'WeeJob',
@@ -29,10 +32,12 @@ export default async function RootLayout({
               <Toaster />
               <NextTopLoader showSpinner={false} speed={10} crawlSpeed={10}/>
               <NextAuthProvider session={session}>
-                  <Navbar />
+                  <Navbar  />
                   <LoginModal />
                   <RegisterModal />
+                  <EditModal />
                   <ProposalModal />
+                  <OfferModal/>
                   <div className="pt-[7vh] ">{children}</div>
                   <Footer />
               </NextAuthProvider>

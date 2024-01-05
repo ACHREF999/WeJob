@@ -66,11 +66,13 @@ model User {
   hashedPassword String
   image String?
   profileImage String?
+  description String?
 
   role UserRole
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   generalRating Float @default(0)
+  location String?
   // profile Profile?
   hasNotification Boolean @default(false)
   notifications Notification[]
@@ -93,10 +95,8 @@ model User {
   messages Message[]
   clientChatrooms Chatroom[] @relation("Client")
   freelancerChatrooms Chatroom[] @relation("Freelancer")
-
-
-
-
+  githubLink String?
+  linkedinLink String?
 }
 
 model jobContract {
@@ -190,8 +190,8 @@ model Gig{
 // offer ydireh client lel freelancer
 model Offer {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  description String
+  // title String
+  letter String
   // pricing + price
   pricing PricingType
   price Int

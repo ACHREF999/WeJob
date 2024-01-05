@@ -15,7 +15,7 @@ function SearchBar() {
     console.log(search)
     if(search){
       newParams.set('keyword',search)
-      router.push(`/jobs?${newParams.toString()}`)
+      router.push(`/gigs?${newParams.toString()}`)
     }
   }
   return (

@@ -13,7 +13,7 @@ import { getSession } from 'next-auth/react'
 import {signOut} from 'next-auth/react'
 import { useSession } from 'next-auth/react'
 import LoadingComp from './LoadingComp'
-
+import Image from 'next/image'
 
 interface PostOptionsType {
     value: string
@@ -110,6 +110,7 @@ function Navbar() {
     useEffect(()=>{
         if(params.get('keyword')) setKeyword(params.get('keyword') as string);
     },[params])
+    console.log(session)
 
     return (
         <>
@@ -150,7 +151,34 @@ function Navbar() {
                             defaultValue={{ value: 'TALENT', label: 'Talent' }}
                         />
                     </form>
-                    {(status === 'unauthenticated' ) ? (
+                    {(status === 'loading' ) ? (<LoadingComp/>): (status=='authenticated')?(
+                        <>
+                            <button
+                                className="text-[#8301B1]  p-2 px-4 rounded-xl font-semibold"
+                                onClick={(e) => signOut()}
+                            >
+                                LogOut
+                            </button>
+                            <Link href={`/profile/${session?.user?.userId}`}>
+                                <div className="flex flex-row gap-4 rounded-xl  items-center px-4">
+                                    <span className="font-medium">
+                                        {session?.user?.name}
+                                    </span>
+                                    <div className="h-12 w-12 relative">
+                                    <Image 
+                                    src={session?.user?.image  || '/images/placeholder.png'}
+                                    // width={120}
+                                    // height={120}
+                                    fill
+                                    objectFit='cover'
+                                    alt={"Profile Image"}
+                                    className="rounded-full"
+                                    />
+                                    </div>
+                                </div>
+                            </Link>
+                        </>
+                    ):(
                         <>
                             <button
                                 className="text-[#8301B1]  p-2 px-4 rounded-xl font-semibold"
@@ -165,17 +193,7 @@ function Navbar() {
                                 Sign Up
                             </button>
                         </>
-                    ) : (status=='authenticated')?(
-                        <>
-                            <h1>{session?.user?.name}</h1>
-                            <button
-                                className="text-[#8301B1]  p-2 px-4 rounded-xl font-semibold"
-                                onClick={(e) => signOut()}
-                            >
-                                LogOut
-                            </button>
-                        </>
-                    ):(<LoadingComp/>)}
+                    ) }
                 </div>
             </div>
         </>

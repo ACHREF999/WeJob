@@ -29,14 +29,14 @@ function ProfileCard({ image, name ,userId}: ProfileCardProps) {
 
                 <Link
                     href={`/profile/${userId}`}
-                    className="text-[#8301B1] mt-4 pt-1 pb-2 border-t-[2px] font-semibold flex flex-row gap-1 items-center "
+                    className="text-[#8301B1] mt-4 pt-1 pb-2 border-t-[2px] font-semibold flex flex-row gap-1 justify-self-center "
                 >
                     {' '}
                     <MdOutlineModeEdit size={22} />
                     Customize your profile{' '}
                 </Link></>)}
             </div>
-            <Link href="/gigs/create" className="border-none bg-[#740B99] text-white font-semibold text-lg mt-4 lg:mt-8 py-2 px-4 rounded-full w-full">Create a Gig</Link>
+            <Link href="/gigs/create" className="border-none bg-[#740B99] text-white font-semibold text-lg mt-4 lg:mt-8 py-2 px-4 rounded-full w-full flex flex-col items-center">Create a Gig</Link>
         </div>
     )
 }

@@ -10,12 +10,15 @@ export async function GET(
     req:NextApiRequest,
     {params}:{params:{jobId:string}}
 ){
-    const {currentUser} = await serverAuth(req)
+    const session = await getServerSession(authOptions)
+    let currentUser = session?.user
+
+    if(!currentUser || currentUser?.role=='FREELANCER') return NextResponse.json({data:[]},{status:209})
 
     const jobProposals = await prisma.proposal.findMany({
         where:{
             jobId:params.jobId,
-            userId:currentUser.id
+            userId:currentUser.userId
         }
     })
     return NextResponse.json({data:jobProposals},{status:200})

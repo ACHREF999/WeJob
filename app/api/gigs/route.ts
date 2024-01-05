@@ -71,6 +71,14 @@ export async function GET(req:NextRequest){
                 ]
         }
     }
+    let userQuery = {
+
+    }
+    if(session?.user?.userId){
+        userQuery = {
+                        freelancerId:session?.user?.userId || "asddsa"
+                    }
+    }
     // let fixedQuery = {}
     // if (!Number.isNaN(fixedMinPrice)) {
     //     fixedQuery.price = {...fixedQuery.price, gt: fixedMinPrice }
@@ -117,9 +125,7 @@ export async function GET(req:NextRequest){
                     OR: [hourlyQuery, fixedQuery],
                 },
                 {
-                    NOT:{
-                        freelancerId:session?.user?.userId || "asddsa"
-                    }
+                    NOT:userQuery
                 },
             ],
         },
@@ -144,7 +150,7 @@ export async function POST(req:Request){
         category:gigData.category,
         stack:gigData.skills as String[]
     }   as TechnicalSkills 
-    let {title,price , pricing , description,duration}=gigData
+    let {title,price , pricing , description,duration,image}=gigData
     if(!session || !session.user || !(session?.user?.userId) || !(session.user.role=='FREELANCER')){
         return NextResponse.json({error:"Not Signed In"})
     }
@@ -156,6 +162,7 @@ export async function POST(req:Request){
             pricing,
             description,
             duration,
+            image:image||null,
             skills:[skills],
             freelancerId:session.user.userId,
         }

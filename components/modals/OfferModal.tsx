@@ -1,11 +1,25 @@
 
 'use client'
-import useProposalModal from '@/hooks/useProposalModal'
+import useOfferModal from '@/hooks/useOfferModal'
 import Modal from './Modal'
 import Select from 'react-select'
+import {useState} from 'react'
+import toast from 'react-hot-toast'
+import axios from 'axios'
+import {useRouter} from 'next/navigation'
 
-function ProposalModal() {
-    const proposalModal = useProposalModal()
+
+
+function OfferModal() {
+    const router = useRouter()
+    const offerModal = useOfferModal()
+    const [duration,setDuration] = useState<number|undefined>()
+    const [letter,setLetter] = useState('')
+    const [price,setPrice] = useState<number|undefined>()
+    const [pricing,setPricing] = useState('FIXED')
+    console.log({duration,price,letter,pricing})
+
+    const [isLoading,setIsLoading] = useState(false)
 
     const pricingOptions = [
         {value:"FIXED",label:'Fixed'},
@@ -23,7 +37,7 @@ function ProposalModal() {
     ]
 
     const durationStyles = {
-        control: (styles) => ({
+        control: (styles:any) => ({
             ...styles,
             paddingTop: '4px',
             paddingBottom: '4px',
@@ -32,7 +46,7 @@ function ProposalModal() {
             // borderRadius:"0px",
             // paddingRight:"10px",
         }),
-        singleValue: (styles) => ({
+        singleValue: (styles:any) => ({
             ...styles,
             color: '#555',
             fontWeight: 600,
@@ -44,11 +58,11 @@ function ProposalModal() {
     const bodyContent = (
         <>
             <div className="flex flex-col gap-4 pt-4">
-                <h2>How Long will this project take</h2>
+                <h2>How Long will your project take</h2>
 
                 <Select
-                    onChange={(e) => console.log}
-                    options={durationOptions}
+                    onChange={(e) => setDuration((e as any).value)}
+                    options={durationOptions as any}
                     // theme={customTheme}
                     styles={durationStyles}
                     // isSearchable
@@ -61,12 +75,14 @@ function ProposalModal() {
                 <textarea
                     className=" resize-none w-full p-3 text-lg border-neutral-300  transition disabled:bg-opacity-70 disabled:bg-neutral-500 disabled:cursor-not-allowed my-2 border-[1px] rounded-xl outline-none focus:border-sky-500 focus:border-2 "
                     rows={4}
+                    value={letter}
+                    onChange={(e)=>setLetter(e.target.value)}
                 />
                 <div className="flex flex-row gap-4 w-full">
                     <section className="w-[50%] flex flex-col gap-4">
                         <h2>Pricing Plan</h2>
                         <Select
-                            onChange={(e) => console.log}
+                            onChange={(e) => setPricing((e as any).value)}
                             options={pricingOptions}
                             // theme={customTheme}
                             styles={durationStyles}
@@ -83,6 +99,8 @@ function ProposalModal() {
                             <input
                                 type="number"
                                 className="border-none p-2 w-[70%] outline-none rounded-xl "
+                                value={price}
+                                onChange={(e)=>setPrice(parseInt(e.target.value))}
                             />
                             <span className="font-semibold">D.A</span>
                         </div>
@@ -92,23 +110,38 @@ function ProposalModal() {
         </>
     )
 
-    const footerContent = (<div>hola</div>)
-    const handleSubmit = ()=>{
+    const footerContent = (<div></div>)
+    const handleSubmit = async ()=>{
+        if(!duration || letter.length < 20 || !price || price <100 || !pricing ){
+            toast.error('Please Fill Fields Correctly')
+            return
+        }
+        setIsLoading(true)
+        const offer =  await axios.post('/api/offers/',{gigId:offerModal.gigId,duration,letter,price,pricing})
+        if(offer){
+            toast.success('Offer Sent successfully')
+            offerModal.onClose()
+            router.refresh()
+        }
+        else{
+            toast.error('An error occured')
+        }
+        setIsLoading(false)
         
     }
     // console.log(proposalModal)
     return (
         <Modal
-            isOpen={proposalModal.isOpen}
-            onClose={proposalModal.onClose}
+            isOpen={offerModal.isOpen}
+            onClose={offerModal.onClose}
             onSubmit={handleSubmit}
             body={bodyContent}
             footer={footerContent}
-            title={"Submit a Proposal"}
-            disabled={false}
+            title={"Make an offer"}
+            disabled={isLoading}
             actionLabel="Submit"
         />
     )
 }
 
-export default ProposalModal
+export default OfferModal

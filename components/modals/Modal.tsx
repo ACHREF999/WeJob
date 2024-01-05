@@ -57,7 +57,7 @@ function Modal({
                 {/* End Of Header */}
 
                 {/* Body */}
-                <div className="p-2 px-[5%] ">{body}</div>
+                <div className="p-2 px-[5%] overflow-y-auto">{body}</div>
                 <div className="absolute bottom-0 inset-x-0 p-2 px-[5%] flex flex-col gap-4 mb-6">
                     <button
                         className="bg-[#2594FA] w-[100%] self-center p-2 rounded-2xl text-white text-xl  font-semibold hover:opacity-95 transition-all"
