@@ -67,7 +67,7 @@ model User {
   image String?
   profileImage String?
 
-  role UserRole @default(CLIENT)
+  role UserRole
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   generalRating Float @default(0)
@@ -79,8 +79,8 @@ model User {
   
   createdJobs Job[] @relation("Client")
   proposals Proposal[]
-  proposalContractClient ProposalContract[] @relation("ContractClient")
-  proposalContractFreelancer ProposalContract[] @relation("ContractFreelancer")
+  jobContractClient jobContract[] @relation("ContractClient")
+  jobContractFreelancer jobContract[] @relation("ContractFreelancer")
 
   
   
@@ -99,7 +99,7 @@ model User {
 
 }
 
-model ProposalContract {
+model jobContract {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   pricing PricingType
   price Float
@@ -116,8 +116,8 @@ model ProposalContract {
   freelancer User @relation("ContractFreelancer",fields: [freelancerId],references: [id])
   job Job @relation(fields: [jobId],references: [id])
 
-
 }
+
 
 model GigContract {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
@@ -153,8 +153,8 @@ model Job {
 
   skills TechnicalSkills[]
   proposals Proposal[]
-  locked Boolean
-  contract ProposalContract?
+  locked Boolean @default(false)
+  contract jobContract?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   review Review?
@@ -168,25 +168,35 @@ model Gig{
   description String
   tags String[]
   //tech skills
+  skills TechnicalSkills[]
   pricing PricingType
   price Float
+  duration Int @default(1)
+  
   image String?
   freelancerId String @db.ObjectId
   freelancer User @relation(fields: [freelancerId],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  offer Offer[]
+  offers Offer[]
   contract GigContract[]
   // proposals Proposal[]
+  // reviews Reviews[]
 
 }
 
+
+// offer ydireh client lel freelancer
 model Offer {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   title String
   description String
   // pricing + price
+  pricing PricingType
+  price Int
+  duration Int
+
   gigId String @db.ObjectId 
   gig Gig @relation(fields: [gigId],references: [id])
   clientId String @db.ObjectId
@@ -195,11 +205,16 @@ model Offer {
 
 }
 
+
+
+//proposal ydireh freelancer to the job
 model Proposal{
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  content String
+  // title String
+  letter String
   price Float
+  pricing PricingType 
+  duration Int
   userId String @db.ObjectId
   jobId String @db.ObjectId
   // gigId String @db.ObjectId
@@ -213,6 +228,10 @@ model Proposal{
   @@unique([userId,jobId])
 
 }
+
+
+
+
 
 model Review{
 
@@ -248,9 +267,18 @@ model Chatroom {
 
 }
 
+// model ProposalChatroom {
+//   id       String    @id @default(auto()) @map("_id") @db.ObjectId
+//   messages Message[]
+//   freelancerId String @db.ObjectId
+//   freelancer User @relation("Freelancer",fields: [freelancerId],references: [id])
+
+// }
+
 model Message {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   content String
+  createdAt DateTime @default(now())
   userId String @db.ObjectId
   chatroomId String @db.ObjectId
   user User @relation(fields: [userId],references: [id])

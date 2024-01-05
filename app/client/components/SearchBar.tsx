@@ -1,0 +1,28 @@
+'use client'
+import {FormEvent, useState} from 'react'
+import Input from '@/components/Input';
+import { RiSearchLine } from 'react-icons/ri'
+import { redirect } from 'next/navigation';
+
+function SearchBar() {
+  const [search,setSearch] = useState('')
+  const handleSubmit = (e:any)=>{
+    e.preventDefault()
+    if(search)  redirect(`/gigs?keyword=${search}`)
+    else redirect(`/gigs`)
+  }
+  return (
+    <form method="GET" onSubmit={handleSubmit} className="w-full my-2 lg:my-5 flex flex-row rounded-lg border-[2px] border-gray-200">
+        <input 
+        onChange={(e)=>setSearch(e.target.value)}
+        value={search}
+        placeholder="search"
+        className="border-none focus:border-none w-full px-6 outline-none rounded-l-lg text-xl"
+        />
+
+        <button type="submit" onClick={handleSubmit} className="border-none bg-[#740B99] text-white font-semibold text-lg   py-2 px-4  w-fit rounded-r-lg "><RiSearchLine size={24}/></button>
+    </form>
+  )
+}
+
+export default SearchBar

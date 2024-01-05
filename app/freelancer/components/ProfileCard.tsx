@@ -1,33 +1,42 @@
+'use client'
+import LoadingComp from '@/components/LoadingComp'
+import useUser from '@/hooks/useUser'
 import Image from 'next/image'
 import Link from 'next/link'
+import { MdOutlineModeEdit } from "react-icons/md";
 
 interface ProfileCardProps {
     image?: string
     name: string
+    userId:string
 }
 
-function ProfileCard({ image, name }: ProfileCardProps) {
+function ProfileCard({ image, name ,userId}: ProfileCardProps) {
+    const {data,error,isLoading,}= useUser(userId)
+    console.log('Profile Card user : ',data)
+    
     return (
         <div className="flex flex-col items-center justify-center self-start sticky top-0 w-[30%] min-h-[18vh] py-[5%]">
             <div className="rounded-xl shadow-sm flex flex-col items-center justify-center  w-full min-h-[15vh] border-gray-200 border-[1px] py-2 max-h-[380px]">
-                <Image
-                    src="/images/placeholder.png"
+                {isLoading?(<LoadingComp/>):(<><Image
+                    src={data?.data?.image || "/images/placeholder.png"}
                     alt="Profile Image"
                     width={100}
                     height={100}
                     className="rounded-full"
                 />
-                <h1 className="text-xl font-semibold underline">{name}</h1>
+                <h1 className="text-xl font-semibold underline">{`${data?.data?.firstName} ${data?.data?.lastName}`}</h1>
 
                 <Link
-                    href="/profile"
-                    className="text-[#8301B1] mt-4 pt-1 pb-2 border-t-[2px] font-semibold "
+                    href={`/profile/${userId}`}
+                    className="text-[#8301B1] mt-4 pt-1 pb-2 border-t-[2px] font-semibold flex flex-row gap-1 items-center "
                 >
                     {' '}
+                    <MdOutlineModeEdit size={22} />
                     Customize your profile{' '}
-                </Link>
+                </Link></>)}
             </div>
-            <button className="border-none bg-[#740B99] text-white font-semibold text-lg mt-4 lg:mt-8 py-2 px-4 rounded-full w-full">Create a Gig</button>
+            <Link href="/gigs/create" className="border-none bg-[#740B99] text-white font-semibold text-lg mt-4 lg:mt-8 py-2 px-4 rounded-full w-full">Create a Gig</Link>
         </div>
     )
 }

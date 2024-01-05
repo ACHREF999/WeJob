@@ -1,11 +1,20 @@
-import React from 'react'
+'use client'
+// import React from 'react'
+import useSWR from 'swr'
+import fetcher from '@/libs/fetcher'
 
-async function useRecommendedJobs() {
-    const res = await fetch('http:localhost:3001/',{method:'GET'})
-    const jobs = await res.json()
-
-    return jobs
-
+function useRecommendedJobs() {
+    const { data, error, isLoading, mutate } = useSWR(
+        '/api/jobs/recommended/',
+        fetcher
+    )
+    // const jobs = await res.json()
+    return {
+        data,
+        error,
+        isLoading,
+        mutate,
+    }
 }
 
 export default useRecommendedJobs

@@ -1,5 +1,8 @@
-import {useState } from 'react'
+'use client'
+// import {useState } from 'react'
 import JobCard from './JobCard'
+import Loading from '@/components/LoadingComp';
+import useRecommendedJobs from '@/hooks/useRecommendedJobs';
 
 interface JobCardProps {
     title: string
@@ -11,9 +14,9 @@ interface JobCardProps {
     proposals: number
 }
 
-async function RecommendedJobs() {
+function RecommendedJobs({userId}:{userId:string}) {
 
-    const recommendedJobs= [
+    let recommendedJobs= [
         {
             id:"asdkpasodk",
             title: 'UI/UX Web Design',
@@ -58,6 +61,12 @@ async function RecommendedJobs() {
         },
     ]
 
+    const {data,error,isLoading,mutate} = useRecommendedJobs()
+    // console.log(data)
+    recommendedJobs = data
+    if(error){
+      throw new Error("Failed To  fetch jobs")
+    }
     return (
     <div className="min-h-[20vh] rounded-xl border-[2px] flex flex-col p-4">
       <h1 className="text-2xl font-bold text-black pl-4">Jobs you might like</h1>
@@ -69,14 +78,14 @@ async function RecommendedJobs() {
         <p className="px-4 pt-4 my-4 text-2xl ">
           Browse jobs that match your experience to a client&apos;s hiring preferences. Ordered by most relevant.
         </p>
-        {recommendedJobs?.length?(
+        {isLoading?(<Loading/>):(recommendedJobs?.length?(
           recommendedJobs.map(job=>(
             <JobCard 
             {...job}
             key={job.title+job.date}
             />
           ))):(<p className="px-4">No Jobs Found</p>)
-        }
+        )}
 
       </div>
 

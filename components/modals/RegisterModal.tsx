@@ -4,10 +4,50 @@ import useLoginModal from '@/hooks/useLoginModal'
 import Modal from './Modal'
 import { useCallback,useState } from 'react'
 import Input from '../Input'
+import Select, { ThemeConfig } from 'react-select'
+import toast from 'react-hot-toast'
+import axios from 'axios'
+import { signIn } from 'next-auth/react';
+
 
 function RegisterModal() {
     const registerModal = useRegisterModal()
     const loginModal= useLoginModal() 
+    const customTheme = (theme: any) => {
+        return {
+            ...theme,
+            colors: {
+                ...theme.colors,
+                primary25: '#E4EEFC',
+                primary: '#0146B1',
+            },
+        }
+    }
+
+    const userRoleOptions = [
+        { value: 'CLIENT', label: 'Client' },
+        { value: 'FREELANCER', label: 'Freelancer' },
+    ]
+
+    const userRoleStyles = {
+        control: (styles:any) => ({
+            ...styles,
+            paddingTop: '4px',
+            paddingBottom: '4px',
+            // borderColor:"#00000000",
+            // borderRight:"solid 1px #00000055",
+            // borderRadius:"0px",
+            // paddingRight:"10px",
+        }),
+        singleValue: (styles:any) => ({
+            ...styles,
+            color: '#014681dd',
+            fontWeight: 600,
+            fontSize: '20px',
+            paddingLeft: '6px',
+        }),
+    }
+
     const [data, setData] = useState({
         firstName: '',
         lastName: '',
@@ -16,21 +56,88 @@ function RegisterModal() {
         confirmPassword:'',
         profile:'CLIENT',
     })
+
     const [isLoading, setIsLoading] = useState(false)
+
     const onToggle = useCallback(()=>{
         if(isLoading) return 
         registerModal.onClose()
         loginModal.onOpen()
         return
 
-    },[])
-        const handleSubmit = useCallback(() => {
-        console.log(data)
-    }, [data])
+    },[isLoading,registerModal,loginModal])
+
+    const validateEmail = (email:string) => {
+        return String(email)
+            .toLowerCase()
+            .match(
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            )
+    }
+
+    const validatePassword = (password:string,confirmPassword:string)=>{
+        if(!password || password.length < 3) return false
+        if (password !== confirmPassword) return false
+
+        return true
+    }
+    const validateData = ()=>{
+        return !(
+            !data.firstName ||
+            !data.lastName ||
+            !validateEmail(data.email) ||
+            !validatePassword(data.password, data.confirmPassword) ||
+            !data.profile
+        )
+    }
+
+
+    const handleSubmit = async() => {
+        if(!validateData()) return toast.error('Invalid Data')
+
+        try{
+            setIsLoading(true)
+            // console.log(data)
+            const res = await axios.post('/api/register',{
+                firstName:data.firstName,
+                lastName:data.lastName,
+                email:data.email,
+                role:data.profile,
+                password:data.password,
+
+            })
+            
+            toast.success('helleo')
+            // console.log(data)
+            
+            await signIn('credentials',{
+                email:data.email,
+                password:data.password
+            })
+            // setData({
+            //     firstName: '',
+            //     lastName: '',
+            //     email: '',
+            //     password: '',
+            //     confirmPassword: '',
+            //     profile: 'CLIENT',
+            // })
+            registerModal.onClose()
+
+
+
+        }
+        catch(err){
+            console.log(err)
+        }
+        finally{
+            setIsLoading(false)
+        }
+    }
 
 
     const bodyContent = (
-        <div className="flex flex-col gap-4 mt-8">
+        <div className="flex flex-col gap-2 lg:gap-4 mt-2 xl:mt-8">
             <h1 className="pl-2 text-gray-400 font-medium">
                 Join Us Now and explore The Talents and Jobs tailored for you
             </h1>
@@ -77,11 +184,19 @@ function RegisterModal() {
                     setData({ ...data, confirmPassword: e.target.value })
                 }
             />
-
-            <select className="w-full p-3 text-lg border-neutral-300 border-[1px] rounded-xl outline-none focus:border-sky-500 focus:border-2 transition disabled:bg-opacity-70 disabled:bg-neutral-500 disabled:cursor-not-allowed my-2 pr-10" onChange={(e)=>setData({...data,profile:e.target.value})}>
-                <option value="CLIENT">Client</option>
-                <option value="FREELANCER">Freelancer</option>
-            </select>
+            <div className="w-full ">
+                <Select
+                    onChange={(e) => setData({...data,profile:e?.value as string})}
+                    options={userRoleOptions}
+                    theme={customTheme}
+                    styles={userRoleStyles}
+                    // isSearchable
+                    
+                    placeholder="Type"
+                    className="w-full"
+                    defaultValue={{ value: 'CLIENT', label: 'Client' }}
+                />
+            </div>
         </div>
     )
 

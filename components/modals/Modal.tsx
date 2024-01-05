@@ -33,7 +33,7 @@ function Modal({
     if(disabled) return 
     onSubmit()
   },[disabled,onSubmit])
-    return (
+    return (isOpen&&(
         <div
             className={`${
                 isOpen ? ' ' : ' hidden '
@@ -47,7 +47,7 @@ function Modal({
             >
                 {/* Header  */}
                 <div className="flex flex-row pt-2 pb-8 px-[5%] mt-6 justify-between items-center border-b-blue-300 border-opacity-30 border-b-[1px]">
-                    <span className="text-xl lg:text-2xl font-semibold">
+                    <span className="text-2xl lg:text-3xl font-semibold ">
                         {title}
                     </span>
                     <button className="" onClick={handleClose}>
@@ -70,7 +70,7 @@ function Modal({
                 </div>
             </div>
         </div>
-    )
+    ))
 }
 
 export default Modal

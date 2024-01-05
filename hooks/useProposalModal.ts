@@ -2,16 +2,17 @@ import {create} from 'zustand'
 
 interface ProposalStore {
     isOpen:boolean;
-    jobId:string;
-    onOpen:(id:string)=>void;
+    // jobId:string;
+    onOpen:(jobId:string)=>void;
     onClose:()=>void;
+    jobId:string;
 }
 
 
 const useProposalModal = create<ProposalStore>((set)=>({
     isOpen:false,
     jobId:'',
-    onOpen:(id:string)=>(set({isOpen:true,jobId:id})),
+    onOpen:(jobId)=>(set({isOpen:true,jobId:jobId})),
     onClose:()=>(set({isOpen:false})),
 }))
 

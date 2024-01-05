@@ -107,6 +107,7 @@ function HeroSearchBar() {
             }
         },
     }
+    
   return (
       <div className="w-full lg:w-[80%] absolute bg-white shadow-md border-neutral-200 border-[1px] rounded-xl p-4 -bottom-[40px] lg:ml-[10%] py-4 flex flex-row justify-between ">
           <div className="flex flex-row w-full">
@@ -127,25 +128,26 @@ function HeroSearchBar() {
           </div>
 
           {/* Categories */}
-          <div className="w-[50%] mx-4">
-              <Select
-                  placeholder="Select Categories"
-                  onChange={(e) => {
-                      setSelectedCategories((prev) =>
-                          e.map((option) => {
-                              return option.value
-                          })
-                      )
-                  }}
-                  noOptionsMessage={() => 'No matches found .'}
-                  theme={customTheme}
-                  isSearchable
-                  isMulti
-                  className="w-full hide-scrollbar"
-                  options={categoryOptions}
-                  styles={categoryStyles}
-              />
-          </div>
+            <div className="w-[50%] mx-4">
+                <Select
+                    placeholder="Select Categories"
+                    onChange={(e) => {
+                        setSelectedCategories((prev) =>
+                            e.map((option) => {
+                                return option.value
+                            })
+                        )
+                    }}
+                    noOptionsMessage={() => 'No matches found .'}
+                    theme={customTheme}
+                    isSearchable
+                    isMulti
+                    className="w-full hide-scrollbar"
+                    options={categoryOptions}
+                    styles={categoryStyles}
+                />
+            </div>
+
           </div>
 
           {/* Search BUTTON */}

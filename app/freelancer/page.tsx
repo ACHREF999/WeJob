@@ -2,9 +2,19 @@ import ProfileCard from "./components/ProfileCard"
 import SearchBar from './components/SearchBar'
 import RecommendedJobs from './components/RecommendedJobs'
 import Carousel from './components/Carousel'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/libs/auth'
+import { redirect } from 'next/navigation'
 
-
-function Freelancer() {
+async function FreelancerHomepage() {
+  const session = await getServerSession(authOptions)
+  if(!session) redirect('/')
+  else{
+    if((session.user?.role)==='CLIENT'){
+        redirect('/client')
+    }
+  }
+  
   return (
       <div className="w-full flex flex-row justify-around px-[5%]  gap-8">
           
@@ -12,13 +22,13 @@ function Freelancer() {
             <Carousel />
             {/* Recommendation with the Search Bar */}
             <SearchBar />
-            <RecommendedJobs />
+            <RecommendedJobs userId={session.user?.userId as string} />
           </div>
 
               {/* Right Side */}
-              <ProfileCard name="Mehamlia Youcef" />
+              <ProfileCard name={`${session.user?.firstName}`} userId={session.user?.userId as string} />
       </div>
   )
 }
 
-export default Freelancer
+export default FreelancerHomepage
